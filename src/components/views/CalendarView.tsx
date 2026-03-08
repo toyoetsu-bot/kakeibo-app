@@ -14,9 +14,10 @@ import {
 } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { cn } from '../../utils/cn';
+import { DynamicIcon } from '../../utils/icons';
 
 export function CalendarView() {
-    const { currentDate, transactions, setSelectedDay, setTab } = useAppStore();
+    const { currentDate, transactions, categories, setSelectedDay, setTab, setEditingTransactionId } = useAppStore();
     const dateObj = parseISO(currentDate);
 
     // Generate calendar days (including padding for the first/last week)
@@ -29,6 +30,10 @@ export function CalendarView() {
     const monthTransactions = useMemo(() => {
         return transactions.filter(t => isSameMonth(parseISO(t.date), dateObj));
     }, [transactions, dateObj]);
+
+    const sortedTransactions = useMemo(() => {
+        return [...monthTransactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [monthTransactions]);
 
     const totalIncome = monthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const totalExpense = monthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
@@ -116,6 +121,66 @@ export function CalendarView() {
                         );
                     })}
                 </div>
+            </div>
+
+            {/* Transaction List */}
+            <div className="px-4 pb-20">
+                <h3 className="text-white font-bold mb-3 border-b-2 border-gray-700 pb-2 flex items-center gap-2">
+                    <DynamicIcon name="List" size={18} className="text-splat-yellow" />
+                    今月の履歴 ({sortedTransactions.length}件)
+                </h3>
+
+                {sortedTransactions.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8 bg-splat-black rounded-xl border-2 border-dashed border-gray-700">
+                        まだ記録がありません
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {sortedTransactions.map(t => {
+                            const cat = categories.find(c => c.id === t.categoryId);
+                            return (
+                                <button
+                                    key={t.id}
+                                    onClick={() => {
+                                        setEditingTransactionId(t.id);
+                                        setTab('input');
+                                    }}
+                                    className="w-full flex items-center justify-between p-3 bg-splat-black rounded-xl border-2 border-gray-800 hover:border-splat-blue transition-all active:scale-[0.98] text-left"
+                                >
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div
+                                            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                                            style={{ backgroundColor: `${cat?.color || '#fff'}33`, color: cat?.color || '#fff' }}
+                                        >
+                                            <DynamicIcon name={cat?.icon || 'HelpCircle'} size={20} />
+                                        </div>
+                                        <div className="flex flex-col overflow-hidden">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-bold text-gray-400">
+                                                    {format(parseISO(t.date), 'M/d')}
+                                                </span>
+                                                <span className="text-white font-bold truncate">
+                                                    {cat?.name || '不明'}
+                                                </span>
+                                            </div>
+                                            {t.memo && (
+                                                <span className="text-xs text-gray-400 truncate">
+                                                    {t.memo}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className={cn(
+                                        "text-lg font-black shrink-0 ml-2",
+                                        t.type === 'income' ? "text-splat-blue" : "text-splat-pink"
+                                    )}>
+                                        {t.type === 'income' ? '+' : '-'}¥{t.amount.toLocaleString()}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -20,6 +20,7 @@ interface AppState {
     currentTab: ViewTab;
     currentDate: string; // ISO string representing currently viewed month (YYYY-MM-01)
     selectedDay: string | null; // Selected day YYYY-MM-DD
+    editingTransactionId: string | null; // ID of the transaction being edited
 
     transactions: Transaction[];
     categories: Category[];
@@ -29,6 +30,7 @@ interface AppState {
     setTab: (tab: ViewTab) => void;
     setCurrentMonth: (dateStr: string) => void;
     setSelectedDay: (dateStr: string | null) => void;
+    setEditingTransactionId: (id: string | null) => void;
 
     addTransaction: (t: Omit<Transaction, 'id'>) => void;
     deleteTransaction: (id: string) => void;
@@ -48,6 +50,7 @@ export const useAppStore = create<AppState>()(
             currentTab: 'calendar',
             currentDate: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
             selectedDay: null,
+            editingTransactionId: null,
 
             transactions: [],
             categories: defaultCategories,
@@ -56,6 +59,7 @@ export const useAppStore = create<AppState>()(
             setTab: (tab) => set({ currentTab: tab }),
             setCurrentMonth: (dateStr) => set({ currentDate: dateStr }),
             setSelectedDay: (dateStr) => set({ selectedDay: dateStr }),
+            setEditingTransactionId: (id) => set({ editingTransactionId: id }),
 
             addTransaction: (t) => set((state) => ({
                 transactions: [...state.transactions, { ...t, id: crypto.randomUUID() }]

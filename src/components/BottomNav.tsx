@@ -4,7 +4,7 @@ import { CalendarDays, PenTool, PieChart } from 'lucide-react';
 import { cn } from '../utils/cn';
 
 export function BottomNav() {
-    const { currentTab, setTab } = useAppStore();
+    const { currentTab, setTab, setEditingTransactionId } = useAppStore();
 
     const navItems = [
         { id: 'calendar', label: 'カレンダー', icon: <CalendarDays size={24} />, color: 'text-splat-blue', bg: 'bg-splat-blue' },
@@ -20,7 +20,10 @@ export function BottomNav() {
                 return (
                     <button
                         key={item.id}
-                        onClick={() => setTab(item.id)}
+                        onClick={() => {
+                            setEditingTransactionId(null);
+                            setTab(item.id);
+                        }}
                         className={cn(
                             "relative flex flex-col items-center justify-center w-20 h-full transition-transform active:scale-95",
                             isActive ? "text-white" : "text-gray-400 hover:text-white"

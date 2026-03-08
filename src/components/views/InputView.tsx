@@ -5,17 +5,22 @@ import { Button } from '../ui/Button';
 import { DynamicIcon } from '../../utils/icons';
 import { format } from 'date-fns';
 import { cn } from '../../utils/cn';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 
 export function InputView() {
-    const { categories, addTransaction, selectedDay, setTab, addCategory } = useAppStore();
+    const {
+        categories, addTransaction, selectedDay, setTab, addCategory,
+        editingTransactionId, transactions, updateTransaction, deleteTransaction, setEditingTransactionId
+    } = useAppStore();
 
-    const [type, setType] = useState<TransactionType>('expense');
-    const [amount, setAmount] = useState('');
-    const [date, setDate] = useState(selectedDay || format(new Date(), 'yyyy-MM-dd'));
-    const [categoryId, setCategoryId] = useState<string>('');
-    const [memo, setMemo] = useState('');
-    const [isRecurring, setIsRecurring] = useState(false);
+    const editingTx = editingTransactionId ? transactions.find(t => t.id === editingTransactionId) : null;
+
+    const [type, setType] = useState<TransactionType>(editingTx ? editingTx.type : 'expense');
+    const [amount, setAmount] = useState(editingTx ? String(editingTx.amount) : '');
+    const [date, setDate] = useState(editingTx ? editingTx.date : (selectedDay || format(new Date(), 'yyyy-MM-dd')));
+    const [categoryId, setCategoryId] = useState<string>(editingTx ? editingTx.categoryId : '');
+    const [memo, setMemo] = useState(editingTx ? (editingTx.memo || '') : '');
+    const [isRecurring, setIsRecurring] = useState(editingTx ? !!editingTx.isRecurring : false);
 
     const [showAddCategory, setShowAddCategory] = useState(false);
     const [newCatName, setNewCatName] = useState('');
@@ -34,18 +39,38 @@ export function InputView() {
         if (!amount || isNaN(Number(amount))) return;
         if (!categoryId) return;
 
-        addTransaction({
+        const txData = {
             amount: Number(amount),
             date,
             categoryId,
             memo,
             type,
             isRecurring
-        });
+        };
+
+        if (editingTransactionId) {
+            updateTransaction(editingTransactionId, txData);
+            setEditingTransactionId(null);
+        } else {
+            addTransaction(txData);
+        }
 
         // Reset and go back to calendar
         setAmount('');
         setMemo('');
+        setTab('calendar');
+    };
+
+    const handleDelete = () => {
+        if (editingTransactionId && window.confirm('本当に削除しますか？')) {
+            deleteTransaction(editingTransactionId);
+            setEditingTransactionId(null);
+            setTab('calendar');
+        }
+    };
+
+    const handleCancel = () => {
+        setEditingTransactionId(null);
         setTab('calendar');
     };
 
@@ -88,6 +113,15 @@ export function InputView() {
                     収入
                 </button>
             </div>
+
+            {editingTransactionId && (
+                <div className="px-4 pt-4 flex justify-between items-center">
+                    <h2 className="text-splat-yellow font-bold text-lg">編集モード</h2>
+                    <button onClick={handleCancel} className="text-gray-400 hover:text-white flex items-center gap-1 transition-colors">
+                        <X size={20} /> キャンセル
+                    </button>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="p-4 space-y-6">
 
@@ -197,16 +231,28 @@ export function InputView() {
                     </label>
                 </div>
 
-                {/* Submit */}
-                <Button
-                    type="submit"
-                    variant="primary"
-                    size="lg"
-                    fullWidth
-                    className="mt-6 text-2xl tracking-widest"
-                >
-                    {type === 'expense' ? '支 出' : '収 入'} 登録 !!
-                </Button>
+                {/* Submit / Actions */}
+                <div className="mt-6 flex gap-3">
+                    {editingTransactionId && (
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={handleDelete}
+                            className="flex-shrink-0 !bg-red-900 !text-red-200 border-red-700 hover:!bg-red-800"
+                        >
+                            <Trash2 size={24} />
+                        </Button>
+                    )}
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
+                        className="text-2xl tracking-widest flex-1"
+                    >
+                        {editingTransactionId ? '更新する !!' : (type === 'expense' ? '支 出' : '収 入') + ' 登録 !!'}
+                    </Button>
+                </div>
             </form>
         </div>
     );
