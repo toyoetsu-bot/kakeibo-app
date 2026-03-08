@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-splat-dark text-white font-splatoon antialiased;
+    /* subtle dot pattern background */
+    background-image: radial-gradient(circle, #333 1px, transparent 1px);
+    background-size: 20px 20px;
+    margin: 0;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .splat-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.8);
+  }
+  
+  .splat-shadow-sm {
+    box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.8);
+  }
+  
+  .skew-btn {
+    transform: skew(-5deg);
+  }
+  
+  .skew-btn-content {
+    transform: skew(5deg);
+  }
+  
+  /* Ink splatter effects as CSS mask or background shapes can be complex,
+     we'll use border radious distortion for organic shapes */
+  .organic-shape {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+
+  .organic-shape-2 {
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes ink-spread {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.05); opacity: 0; }
+}
+
+.animate-ink {
+  animation: ink-spread 0.5s ease-out forwards;
+}
