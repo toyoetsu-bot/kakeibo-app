@@ -110,6 +110,23 @@ export const useAppStore = create<AppState>()(
         }),
         {
             name: 'kaikebo-splatoon-storage',
+            merge: (persistedState: any, currentState) => {
+                // Ensure new default categories are added to existing users
+                const persistedCategories = persistedState?.categories || [];
+                const mergedCategories = [...persistedCategories];
+
+                defaultCategories.forEach(defaultCat => {
+                    if (!mergedCategories.find(c => c.name === defaultCat.name)) {
+                        mergedCategories.push(defaultCat);
+                    }
+                });
+
+                return {
+                    ...currentState,
+                    ...persistedState,
+                    categories: mergedCategories,
+                };
+            }
         }
     )
 );
