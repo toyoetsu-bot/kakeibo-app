@@ -13,7 +13,9 @@ const defaultCategories: Category[] = [
     { id: 'exp-3', name: '交際費', type: 'expense', color: '#6d2bb8', icon: 'Users' },
     { id: 'exp-4', name: '書籍・教材', type: 'expense', color: '#1942d8', icon: 'BookOpen' },
     { id: 'exp-5', name: '日用品', type: 'expense', color: '#8fd131', icon: 'ShoppingBag' },
-    { id: 'exp-6', name: 'その他', type: 'expense', color: '#a0a0a0', icon: 'MoreHorizontal' },
+    { id: 'exp-6', name: '住居費', type: 'expense', color: '#00ced1', icon: 'Home' },
+    { id: 'exp-7', name: '旅費', type: 'expense', color: '#ff69b4', icon: 'Plane' },
+    { id: 'exp-8', name: 'その他', type: 'expense', color: '#a0a0a0', icon: 'MoreHorizontal' },
 ];
 
 interface AppState {
