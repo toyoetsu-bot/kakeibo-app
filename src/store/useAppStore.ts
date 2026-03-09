@@ -77,9 +77,18 @@ export const useAppStore = create<AppState>()(
                 )
             })),
 
-            addCategory: (c) => set((state) => ({
-                categories: [...state.categories, { ...c, id: `cat-${crypto.randomUUID()}` }]
-            })),
+            addCategory: (c) => set((state) => {
+                const newCategories = [...state.categories, { ...c, id: `cat-${crypto.randomUUID()}` }];
+
+                // Sort to ensure 'その他' is always at the end
+                newCategories.sort((a, b) => {
+                    if (a.name === 'その他') return 1;
+                    if (b.name === 'その他') return -1;
+                    return 0; // Keep other categories in their original order
+                });
+
+                return { categories: newCategories };
+            }),
 
             setBudget: (categoryId, amount) => set((state) => {
                 const existing = state.budgets.find(b => b.categoryId === categoryId);
@@ -116,9 +125,25 @@ export const useAppStore = create<AppState>()(
                 const mergedCategories = [...persistedCategories];
 
                 defaultCategories.forEach(defaultCat => {
-                    if (!mergedCategories.find(c => c.name === defaultCat.name)) {
+                    const existingCatIndex = mergedCategories.findIndex(c => c.name === defaultCat.name);
+                    if (existingCatIndex === -1) {
+                        // Not found, add the new default category
                         mergedCategories.push(defaultCat);
+                    } else {
+                        // Found by name, overwrite its color and icon with the latest defaults
+                        mergedCategories[existingCatIndex] = {
+                            ...mergedCategories[existingCatIndex],
+                            color: defaultCat.color,
+                            icon: defaultCat.icon
+                        };
                     }
+                });
+
+                // Sort to ensure 'その他' is always at the end after merge
+                mergedCategories.sort((a, b) => {
+                    if (a.name === 'その他') return 1;
+                    if (b.name === 'その他') return -1;
+                    return 0;
                 });
 
                 return {
