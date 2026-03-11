@@ -36,8 +36,8 @@ export function ReportView() {
         return Object.values(dataMap).sort((a, b) => b.value - a.value);
     }, [monthExpenses, categories]);
 
-    // 2. Line Chart Data (Last 6 months trend for top 3 categories)
-    const topCategories = pieData.slice(0, 3).map(d => d.name);
+    // 2. Line Chart Data (Last 6 months trend for top 5 categories)
+    const topCategories = pieData.slice(0, 5).map(d => d.name);
 
     const trendData = useMemo(() => {
         const data = [];
@@ -134,6 +134,26 @@ export function ReportView() {
                         <div className="text-center text-gray-500 py-10">データがありません</div>
                     )}
                 </div>
+
+                {/* Category List */}
+                {pieData.length > 0 && (
+                    <div className="space-y-3">
+                        {pieData.map((data, idx) => (
+                            <div key={`cat-list-${idx}`} className="bg-[#1a1a1a] p-3 rounded-xl splat-shadow-sm border-2 border-gray-700 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div
+                                        className="w-4 h-4 rounded-full border border-gray-500"
+                                        style={{ backgroundColor: data.color }}
+                                    />
+                                    <span className="text-white font-bold">{data.name}</span>
+                                </div>
+                                <span className="text-splat-yellow font-bold text-lg">
+                                    ¥{data.value.toLocaleString()}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 {/* Line Chart */}
                 {trendData.length > 0 && topCategories.length > 0 && (
